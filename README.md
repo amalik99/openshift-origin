@@ -1,4 +1,4 @@
-# OpenShift Origin Deployment Template
+# OpenShift Origin Deployment Template - Amit Malik
 
 Bookmark [aka.ms/OpenShift](http://aka.ms/OpenShift) for future reference.
 
