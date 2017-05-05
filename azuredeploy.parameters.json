@@ -1,9 +1,9 @@
-﻿{
+{
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"_artifactsLocation": {
-			"value": "https://raw.githubusercontent.com/Microsoft/openshift-origin/master/"
+			"value": "https://raw.githubusercontent.com/wmhussain/openshift/master/"
 		},
 		"masterVmSize": {
 			"value": "Standard_DS3_v2"
@@ -18,10 +18,10 @@
 			"value": "changeme"
 		},
 		"openshiftMasterPublicIpDnsLabelPrefix": {
-			"value": "changeme"
+			"value": "GEN-UNIQUE"
 		},
 		"nodeLbPublicIpDnsLabelPrefix": {
-			"value": "changeme"
+			"value": "GEN-UNIQUE"
 		},
 		"nodePrefix": {
 			"value": "changeme"
@@ -36,6 +36,9 @@
 			"value": "changeme"
 		},
 		"sshPublicKey": {
+			"value": "GEN-SSH-PUB-KEY"
+		},
+		"subscriptionId": {
 			"value": "changeme"
 		},
 		"keyVaultResourceGroup": {

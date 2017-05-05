@@ -1,4 +1,4 @@
-﻿{
+{
 	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
@@ -8,21 +8,21 @@
 				"description": "The base URL where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated.",
 				"artifactsBaseUrl": ""
 			},
-			"defaultValue": "https://raw.githubusercontent.com/Microsoft/openshift-origin/master/"
+			"defaultValue": "https://raw.githubusercontent.com/wmhussain/openshift/master/"
 		},
 		"masterVmSize": {
 			"type": "string",
 			"defaultValue": "Standard_DS2_v2",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
-				"Standard_D1", "Standard_D2", "Standard_D3", "Standard_D4",
+				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
-				"Standard_D1_v2", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
+				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
 				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
-				"Standard_D1_v2", "Standard_DS2", "Standard_DS3", "Standard_DS4",
+				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
-				"Standard_DS1_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
+				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
 				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
 				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"
 			],
@@ -35,14 +35,14 @@
 			"defaultValue": "Standard_DS2_v2",
 			"allowedValues": [
 				"Standard_A4", "Standard_A5", "Standard_A6", "Standard_A7", "Standard_A8", "Standard_A9", "Standard_A10", "Standard_A11",
-				"Standard_D1", "Standard_D2", "Standard_D3", "Standard_D4",
+				"Standard_D2", "Standard_D3", "Standard_D4",
 				"Standard_D11", "Standard_D12", "Standard_D13", "Standard_D14",
-				"Standard_D1_v2", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
+				"Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2",
 				"Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2",
 				"Standard_G1", "Standard_G2", "Standard_G3", "Standard_G4", "Standard_G5",
-				"Standard_D1_v2", "Standard_DS2", "Standard_DS3", "Standard_DS4",
+				"Standard_DS2", "Standard_DS3", "Standard_DS4",
 				"Standard_DS11", "Standard_DS12", "Standard_DS13", "Standard_DS14",
-				"Standard_DS1_v2", "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
+				"Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2",
 				"Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2",
 				"Standard_GS1", "Standard_GS2", "Standard_GS3", "Standard_GS4", "Standard_GS5"
 			],
@@ -116,6 +116,13 @@
 				"description": "SSH public key on all VMs"
 			}
 		},
+		"subscriptionId": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Azure Subscription ID"
+			}
+		},
 		"keyVaultResourceGroup": {
 			"type": "string",
 			"minLength": 1,
@@ -157,7 +164,6 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
-		"subscriptionId": "[subscription().subscriptionId]",
 		"apiVersionCompute": "2015-06-15",
 		"apiVersionNetwork": "2015-06-15",
 		"apiVersionStorage": "2015-06-15",
@@ -586,7 +592,7 @@
 					},
 					"dataDisks": [{
 						"name": "[concat(parameters('openshiftMasterHostname'), '-docker-pool')]",
-						"diskSizeGB": "128",
+						"diskSizeGB": "1023",
 						"lun": 0,
 						"vhd": {
 							"uri": "[concat('https://', variables('newStorageAccountMaster'), '.blob.core.windows.net/vhd/', parameters('openshiftMasterHostname'), '-docker-pool.vhd')]"
@@ -701,7 +707,7 @@
 					},
 					"dataDisks": [{
 						"name": "[concat(variables('namingInfix'), copyIndex(), '-docker-pool')]",
-						"diskSizeGB": "128",
+						"diskSizeGB": "1023",
 						"lun": 0,
 						"vhd": {
 							"uri": "[concat('https://', variables('newStorageAccountNode'), '.blob.core.windows.net/vhd/', variables('namingInfix'), copyIndex(), '-docker-pool.vhd')]"
@@ -793,7 +799,7 @@
 					"sshPrivateKey": {
 						"reference": {
 							"keyvault": {
-								"id": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+								"id": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 							},
 							"secretName": "[parameters('keyVaultSecret')]"
 						}

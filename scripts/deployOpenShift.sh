@@ -13,7 +13,7 @@ NODECOUNT=$8
 ROUTING=$9
 
 NODELOOP=$((NODECOUNT - 1))
-
+NODEIP=$((NODECOUNT + 3))
 DOMAIN=$( awk 'NR==2' /etc/resolv.conf | awk '{ print $2 }' )
 
 # Generate public / private keys for use by Ansible
@@ -21,6 +21,11 @@ DOMAIN=$( awk 'NR==2' /etc/resolv.conf | awk '{ print $2 }' )
 echo "Generating keys"
 
 runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"
+runuser -l $SUDOUSER -c "cp ~/.ssh/id_rsa ."
+runuser -l $SUDOUSER -c "sed -e 's/\s\+/\n/g' id_rsa > id_rsa.new"
+runuser -l $SUDOUSER -c "tail -n +5 id_rsa.new | head -n -4 > id_rsa.new2"
+runuser -l $SUDOUSER -c "sed -i '1s/^/-----BEGIN RSA PRIVATE KEY-----\n/' id_rsa.new2"
+runuser -l $SUDOUSER -c "echo -----END RSA PRIVATE KEY----- >> id_rsa.new2 && mv id_rsa.new2 ~/.ssh/id_rsa"
 runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 
 echo "Configuring SSH ControlPath to use shorter path name"
@@ -46,9 +51,7 @@ ansible_become=yes
 openshift_install_examples=true
 deployment_type=origin
 openshift_release=v1.5
-#openshift_image_tag=v1.5.0-rc.0
-#consider removing the below and keeping only the version
-#openshift_pkg_version=-1.5.0
+openshift_image_tag=v1.5.0
 docker_udev_workaround=True
 openshift_use_dnsmasq=false
 openshift_override_hostname_check=true
@@ -62,19 +65,17 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # host group for masters
 [masters]
-$MASTER
+#$MASTERPUBLICIPHOSTNAME
+$MASTER.$DOMAIN
 
 # host group for nodes
 [nodes]
-$MASTER openshift_node_labels="{'region': 'master', 'zone': 'default'}" openshift_hostname=$MASTER
+$MASTER.$DOMAIN openshift_node_labels="{'region': 'master', 'zone': 'default'}"
+$NODE-[0:${NODELOOP}].$DOMAIN openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+#$MASTERPUBLICIPHOSTNAME openshift_node_labels="{'region': 'master', 'zone': 'default'}"
+#10.0.1.[4:${NODEIP}] openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+
 EOF
-
-# Loop to add Nodes
-
-for (( c=0; c<$NODECOUNT; c++ ))
-do
-  echo "$NODE-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" openshift_hostname=$NODE-$c" >> /etc/ansible/hosts
-done
 
 runuser -l $SUDOUSER -c "git clone https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
 
